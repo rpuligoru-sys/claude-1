@@ -36,7 +36,7 @@ button{background:#222;color:#fff;border:0;border-radius:8px;padding:.8rem 1.4re
 <label>Floating effect<select name="mo_particles"><option value="theme">Design default</option><option value="petals">Petals</option><option value="diyas">Diyas</option><option value="sparkles">Sparkles</option><option value="none">None</option></select></label>
 <label>Text reveal<select name="mo_reveal"><option value="theme">Design default</option><option value="rise">Rise</option><option value="fade">Fade</option><option value="zoom">Zoom</option></select></label>
 <label>Zoom into the scene while scrolling<select name="mo_zoom"><option value="on">On</option><option value="off">Off</option></select></label></fieldset>
-<fieldset><legend>File name</legend><label>Letters, numbers, dashes (this becomes the link)<input name="slug" required pattern="[a-zA-Z0-9\-]+" placeholder="kiran-mounika"></label></fieldset>
+<fieldset><legend>File name</legend><label>Letters, numbers, dashes (this becomes the link)<input name="slug" required pattern="[a-zA-Z0-9\-]+" placeholder="Groom-Bride"></label></fieldset>
 <button type="button" id="prev">Preview</button><button type="button" id="dl">Download invitation file</button><p id="err"></p></form>
 <iframe id="pv" title="Preview" hidden></iframe>
 <script>
@@ -49,7 +49,7 @@ document.getElementById('evs').innerHTML=[0,1,2].map(i=>`<fieldset><legend>Event
 <label>Time (e.g. 6:00 PM)<input name="e${i}time"></label><label>Google Maps link<input type="url" name="e${i}map"></label></fieldset>`).join('');
 fetch('themes/index.json').then(r=>r.json()).then(ids=>Promise.all(ids.map(id=>fetch(`themes/${id}/theme.json`).then(r=>r.json())))).then(l=>{
  l.forEach(t=>TH[t.id]=t);
- document.getElementById('themes').innerHTML=l.map((t,i)=>`<label><input type="radio" name="theme" value="${t.id}"${i?'':' checked'}><div class="pv" style="background-image:url(themes/${t.id}/preview.svg);color:${t.ac};font-family:'${t.script}',serif">Kiran &amp; Mounika</div>${esc(t.name)}</label>`).join('')});
+ document.getElementById('themes').innerHTML=l.map((t,i)=>`<label><input type="radio" name="theme" value="${t.id}"${i?'':' checked'}><div class="pv" style="background-image:url(themes/${t.id}/preview.svg);color:${t.ac};font-family:'${t.script}',serif">Groom &amp; Bride</div>${esc(t.name)}</label>`).join('')});
 async function shrink(file,W=900,H=900,alpha){const b=await createImageBitmap(file),r=Math.min(1,W/b.width,H/b.height),c=document.createElement('canvas');
  c.width=b.width*r;c.height=b.height*r;c.getContext('2d').drawImage(b,0,0,c.width,c.height);const w=c.toDataURL('image/webp',.75);return w.startsWith('data:image/webp')?w:alpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.75)}
 f.querySelectorAll('[data-p]').forEach(i=>i.onchange=async()=>{P[i.dataset.p]=i.files[0]?await shrink(i.files[0]):''});
