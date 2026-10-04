@@ -1,0 +1,1 @@
+{"name": "Noir champagne", "bg": "#0b1613", "fg": "#f1e9db", "ac": "#d8c3a0", "veil": "rgba(11,22,19,.5)", "card": "rgba(255,255,255,.06)", "script": "Italiana", "body": "Manrope", "sz": 0.95, "zoom": 0.15, "particles": "sparkles", "reveal": "fade", "id": "luxe", "layers": [{"img": "far.svg", "speed": 0.1}, {"img": "mid.svg", "speed": 0.3}, {"img": "near.svg", "speed": 0.6}]}

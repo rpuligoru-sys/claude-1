@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Create a wedding invitation</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:680px;margin:auto;padding:1rem;color:#222}
+fieldset{border:1px solid #ccc;border-radius:10px;margin:1rem 0;padding:1rem}legend{font-weight:600;padding:0 .4rem}
+label{display:block;margin:.6rem 0 .1rem;font-size:.9rem}input,textarea,select{width:100%;padding:.5rem;border:1px solid #bbb;border-radius:6px;font:inherit}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}.themes label{position:relative;border:2px solid #ccc;border-radius:8px;padding:.4rem;text-align:center;cursor:pointer;margin:0}
+.themes input{position:absolute;opacity:0}.themes label:has(input:checked){border-color:#222;box-shadow:0 0 0 2px #222}.themes label:has(input:focus-visible){outline:2px solid #06f}
+.pv{height:140px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:center 40%/cover;margin-bottom:.3rem;font-size:1.6rem;text-shadow:0 1px 6px #000}
+button{background:#222;color:#fff;border:0;border-radius:8px;padding:.8rem 1.4rem;font:inherit;cursor:pointer;margin:.2rem}
+#err{color:#b00}iframe{width:100%;height:80vh;border:1px solid #ccc;border-radius:10px;margin-top:1rem}
+</style></head><body>
+<h1>Create a wedding invitation</h1>
+<fieldset><legend>Open a saved invitation to edit it</legend><input type="file" accept=".html" id="load"></fieldset>
+<form id="f">
+<fieldset><legend>Design</legend><div class="themes" id="themes"></div></fieldset>
+<fieldset><legend>Couple</legend>
+<label>Groom's full name<input name="gname" required></label><label>Groom's parents<input name="gparents"></label>
+<label>Bride's full name<input name="bname" required></label><label>Bride's parents<input name="bparents"></label>
+<label>Couple photo<input type="file" accept="image/*" data-p="couplePhoto"></label>
+<label>Groom photo<input type="file" accept="image/*" data-p="groomPhoto"></label>
+<label>Bride photo<input type="file" accept="image/*" data-p="bridePhoto"></label></fieldset>
+<div id="evs"></div>
+<fieldset><legend>Message and extras</legend>
+<label>Invitation message<textarea name="message" rows="5">We joyfully invite you to celebrate our wedding. Your presence and blessings will make our day complete.</textarea></label>
+<label>Countdown to (wedding date and time)<input type="datetime-local" name="countdown"></label>
+<label>WhatsApp number for wishes (with country code)<input name="whatsapp" placeholder="919876543210"></label>
+<label>Gallery photos (up to 6)<input type="file" accept="image/*" multiple id="gal"></label></fieldset>
+<fieldset><legend>Song</legend><label>Song<select name="songpick" id="sp"><option value="">No song</option><option value="upload">Upload my own (MP3, under 4 MB)</option></select></label>
+<label id="sf" hidden>Song file<input type="file" accept="audio/*" id="sg"></label></fieldset>
+<fieldset><legend>Your own scene (optional)</legend><p><small>Upload transparent PNG/WebP layers to replace the design's scene. Far moves slowest, near moves fastest.</small></p>
+<label>Far layer (background)<input type="file" accept="image/*" data-l="0"></label><label>Middle layer<input type="file" accept="image/*" data-l="1"></label><label>Near layer (foreground)<input type="file" accept="image/*" data-l="2"></label></fieldset>
+<fieldset><legend>Motion</legend>
+<label>Animation<select name="mo_level"><option value="rich">Rich</option><option value="soft">Soft</option><option value="off">Off</option></select></label>
+<label>Speed (0.5 slow to 2 fast)<input type="range" name="mo_speed" min="0.5" max="2" step="0.1" value="1"></label>
+<label>Floating effect<select name="mo_particles"><option value="theme">Design default</option><option value="petals">Petals</option><option value="diyas">Diyas</option><option value="sparkles">Sparkles</option><option value="none">None</option></select></label>
+<label>Text reveal<select name="mo_reveal"><option value="theme">Design default</option><option value="rise">Rise</option><option value="fade">Fade</option><option value="zoom">Zoom</option></select></label>
+<label>Zoom into the scene while scrolling<select name="mo_zoom"><option value="on">On</option><option value="off">Off</option></select></label></fieldset>
+<fieldset><legend>File name</legend><label>Letters, numbers, dashes (this becomes the link)<input name="slug" required pattern="[a-zA-Z0-9\-]+" placeholder="kiran-mounika"></label></fieldset>
+<button type="button" id="prev">Preview</button><button type="button" id="dl">Download invitation file</button><p id="err"></p></form>
+<iframe id="pv" title="Preview" hidden></iframe>
+<script>
+const f=document.getElementById('f'),P={gallery:[]},TH={},err=document.getElementById('err');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const titles=['Reception','Wedding','Another event (optional)'];
+document.getElementById('evs').innerHTML=[0,1,2].map(i=>`<fieldset><legend>Event ${i+1}</legend>
+<label>Event name<input name="e${i}title" value="${i<2?titles[i]:''}"></label><label>Venue name<input name="e${i}venue"></label>
+<label>Address<input name="e${i}addr"></label><label>Date<input type="date" name="e${i}date"></label>
+<label>Time (e.g. 6:00 PM)<input name="e${i}time"></label><label>Google Maps link<input type="url" name="e${i}map"></label></fieldset>`).join('');
+fetch('themes/index.json').then(r=>r.json()).then(ids=>Promise.all(ids.map(id=>fetch(`themes/${id}/theme.json`).then(r=>r.json())))).then(l=>{
+ l.forEach(t=>TH[t.id]=t);
+ document.getElementById('themes').innerHTML=l.map((t,i)=>`<label><input type="radio" name="theme" value="${t.id}"${i?'':' checked'}><div class="pv" style="background-image:url(themes/${t.id}/preview.svg);color:${t.ac};font-family:'${t.script}',serif">Kiran &amp; Mounika</div>${esc(t.name)}</label>`).join('')});
+async function shrink(file,W=900,H=900,alpha){const b=await createImageBitmap(file),r=Math.min(1,W/b.width,H/b.height),c=document.createElement('canvas');
+ c.width=b.width*r;c.height=b.height*r;c.getContext('2d').drawImage(b,0,0,c.width,c.height);const w=c.toDataURL('image/webp',.75);return w.startsWith('data:image/webp')?w:alpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.75)}
+f.querySelectorAll('[data-p]').forEach(i=>i.onchange=async()=>{P[i.dataset.p]=i.files[0]?await shrink(i.files[0]):''});
+f.querySelectorAll('[data-l]').forEach(i=>i.onchange=async()=>{(P.layers=P.layers||['','',''])[i.dataset.l]=i.files[0]?await shrink(i.files[0],1000,1800,true):''});
+document.getElementById('gal').onchange=async e=>{P.gallery=await Promise.all([...e.target.files].slice(0,6).map(x=>shrink(x)))};
+const sp=document.getElementById('sp'),sf=document.getElementById('sf');
+const L=fetch('music/list.json').then(r=>r.ok?r.json():[]).then(l=>l.forEach(([x,n])=>sp.add(new Option(n,'music/'+x)))).catch(()=>{});
+sp.onchange=()=>sf.hidden=sp.value!='upload';
+document.getElementById('sg').onchange=e=>{const x=e.target.files[0];if(!x)return;
+ if(x.size>4e6){e.target.value='';P.song='';err.textContent='That song is over 4 MB. Trim or compress it, then choose it again.';return}
+ err.textContent='';const rd=new FileReader();rd.onload=()=>P.song=rd.result;rd.readAsDataURL(x)};
+function build(preview){const d={...P};new FormData(f).forEach((v,k)=>{if(typeof v=='string')d[k]=v});
+ d.song=sp.value=='upload'?(P.song||''):sp.value;delete d.songpick;d.themeCfg=TH[d.theme];
+ return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(d.gname)} &amp; ${esc(d.bname)}</title>${preview?`<base href="${location.href.replace(/[^/]*$/,'')}">`:''}<link rel="stylesheet" href="themes.css"></head><body><script type="application/json" id="d">${JSON.stringify(d).replace(/</g,'\\u003c')}<\/script><script src="engine.js"><\/script></body></html>`}
+const blob=h=>URL.createObjectURL(new Blob([h],{type:'text/html'}));
+document.getElementById('prev').onclick=()=>{if(!f.reportValidity())return;const p=document.getElementById('pv');p.hidden=false;p.src=blob(build(true));p.scrollIntoView()};
+document.getElementById('dl').onclick=()=>{if(!f.reportValidity())return;const a=document.createElement('a');a.href=blob(build());a.download=f.elements.slug.value+'.html';a.click()};
+document.getElementById('load').onchange=async e=>{const m=(await e.target.files[0].text()).match(/<script type="application\/json" id="d">([\s\S]*?)<\/script>/);
+ if(!m){err.textContent='This file was not made by this form.';return}const d=JSON.parse(m[1]);
+ for(const[k,v]of Object.entries(d)){if(['couplePhoto','groomPhoto','bridePhoto','gallery','layers','song'].includes(k))P[k]=v;else if(f.elements[k]&&k!='themeCfg')f.elements[k].value=v}
+ L.then(()=>{if(d.song){if(d.song.startsWith('data:')){sp.value='upload';sf.hidden=false}else sp.value=d.song}});err.textContent='Loaded. Photos and song are kept unless you choose new ones.'};
+</script></body></html>

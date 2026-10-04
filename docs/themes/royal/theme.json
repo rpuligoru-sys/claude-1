@@ -1,0 +1,1 @@
+{"name": "Royal Indian", "bg": "#2a0510", "fg": "#fbeccb", "ac": "#e0b04a", "veil": "rgba(42,5,16,.55)", "card": "rgba(60,8,22,.45)", "script": "Cinzel Decorative", "body": "Lora", "sz": 0.6, "zoom": 0.3, "particles": "diyas", "reveal": "rise", "id": "royal", "layers": [{"img": "far.svg", "speed": 0.15}, {"img": "mid.svg", "speed": 0.45}, {"img": "near.svg", "speed": 0.85}]}
