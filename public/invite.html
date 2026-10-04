@@ -1,0 +1,41 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wedding invitation</title>
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Josefin+Sans:wght@300;400&family=Great+Vibes&family=Cormorant+Garamond:wght@400;600&family=Cinzel+Decorative&family=Lora&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/themes.css"></head><body>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const img=(s,c='')=>/^data:image\//.test(s||'')?`<img class="${c}" src="${esc(s)}" alt="">`:'';
+const fmt=d=>d?new Date(d+'T00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+(async()=>{
+ const r=await fetch('/api/get?slug='+encodeURIComponent(location.pathname.split('/')[2]||''));
+ if(!r.ok){document.body.innerHTML='<p style="padding:3rem">This invitation was not found. Check the link you were sent.</p>';return}
+ const d=await r.json(),names=`${esc(d.gname)} &amp; ${esc(d.bname)}`;
+ document.body.dataset.theme=['gold','floral','royal','temple'].includes(d.theme)?d.theme:'gold';
+ document.title=`${d.gname} & ${d.bname} – Wedding invitation`;
+ const ev=[0,1,2].filter(i=>d['e'+i+'venue']||d['e'+i+'title']).map(i=>{const g=k=>d['e'+i+k];
+  return `<div class="card"><h2>${esc(g('title'))}</h2><p><b>${esc(g('venue'))}</b></p><p>${esc(g('addr'))}</p><p>${esc(fmt(g('date')))}${g('time')?' · '+esc(g('time')):''}</p>${/^https?:\/\//.test(g('map')||'')?`<a class="btn" target="_blank" rel="noopener" href="${esc(g('map'))}">View on Google Maps</a>`:''}</div>`}).join('');
+ const wa=String(d.whatsapp||'').replace(/\D/g,'');
+ document.body.insertAdjacentHTML('beforeend',`
+ <div id="splash"><h1>The Wedding Of</h1>${img(d.couplePhoto,'ph')}<h2>${names}</h2><button class="btn" id="open">Open invitation</button></div>
+ <main hidden>
+  <section><h1>Wedding Invitation</h1>${img(d.couplePhoto,'ph')}<h2>${names}</h2><p>${esc(fmt(d.e0date||d.e1date))}</p></section>
+  <section class="alt"><h2>Bride &amp; Groom</h2>
+   ${img(d.groomPhoto,'ph')}<h2>${esc(d.gname)}</h2><p>Son of<br><b>${esc(d.gparents)}</b></p><h2>&amp;</h2>
+   ${img(d.bridePhoto,'ph')}<h2>${esc(d.bname)}</h2><p>Daughter of<br><b>${esc(d.bparents)}</b></p></section>
+  <section><h2>Venue details</h2>${ev}</section>
+  <section class="alt"><h2>We are getting married</h2><div class="cd" id="cd"></div>
+   <p class="msg" style="margin-top:1.5rem">${esc(d.message)}</p><h2>${names}</h2></section>
+  ${(d.gallery||[]).length?`<section><h2>Happy moments</h2><div class="gal">${d.gallery.map(g=>img(g)).join('')}</div></section>`:''}
+  ${wa?`<section class="alt"><h2>Send your wishes</h2><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(`Hi ${d.gname} & ${d.bname}, congratulations! 🎉`)}">Wish us on WhatsApp</a></section>`:''}
+ </main>`);
+ const song=/^data:audio\//.test(d.song||'')||/^\/music\/[\w .-]+$/.test(d.song||'')?d.song:'',au=song&&Object.assign(new Audio(song),{loop:true});
+ document.getElementById('open').onclick=()=>{document.getElementById('splash').classList.add('hide');document.querySelector('main').hidden=false;scrollTo(0,0);
+  if(au){au.play().catch(()=>{});const m=document.createElement('button');m.id='mu';m.textContent='♪';m.setAttribute('aria-label','Music on or off');m.onclick=()=>{au.paused?au.play():au.pause();m.style.opacity=au.paused?.5:1};document.body.append(m)}};
+ const bg=/^data:image\/(webp|jpeg|png);base64,[A-Za-z0-9+\/=]+$/.test(d.bgImage||'')?d.bgImage:'';
+ if(bg||document.body.dataset.theme=='temple'){document.body.classList.add('sc');const s=document.createElement('div');s.className='scene';if(bg)s.style.setProperty('--scene',`url("${bg}")`);document.body.prepend(s);
+  const pan=()=>{const m=document.documentElement.scrollHeight-innerHeight;s.style.backgroundPositionY=(m>0?scrollY/m*100:0)+'%'};addEventListener('scroll',pan,{passive:true});pan()}
+ const t=new Date(d.countdown||'').getTime(),cd=document.getElementById('cd');
+ if(t)(function tick(){const s=Math.max(0,(t-Date.now())/1000|0);
+  cd.innerHTML=[['Days',86400],['Hrs',3600],['Min',60],['Sec',1]].map(([n,m],i)=>`<div><b>${String((s/m|0)%(i?[0,24,60,60][i]:1e9)).padStart(2,'0')}</b>${n}</div>`).join('');setTimeout(tick,1000)})();
+})();
+</script></body></html>
